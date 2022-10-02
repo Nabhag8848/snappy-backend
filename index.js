@@ -14,6 +14,10 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 5000;
 
+app.get('/', async (req, res) => {
+    res.status(200).send('Health Check');
+})
+
 app.post('/create', async (req, res) => {
     try {
     
