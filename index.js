@@ -42,6 +42,24 @@ app.post('/create', async (req, res) => {
     }
    
 })
+
+app.post('/create-url', async (req, res) => {
+
+    try {
+    
+        const inputs = req.body;
+        const replicate = new Replicate({token: process.env.AuthToken});
+        const stableDiffusion = await replicate.models.get('stability-ai/stable-diffusion');
+        const stableDiffusionPrediction = await stableDiffusion.predict(inputs);
+
+        res.status(200).send(stableDiffusionPrediction);
+
+    }
+    catch(err){
+        console.log('err')
+        res.status(400).send(err);
+    }
+})
     
 app.listen(PORT, () => {
     console.log(`Server is up and running on PORT: ${PORT}`);
