@@ -3,8 +3,6 @@ import imageToBase64 from 'image-to-base64';
 export async function imagetobase64(image){
 
     const Base64 = await imageToBase64(image);
-    console.log('5');
-    console.log(Base64)
     return Base64;
 
 }

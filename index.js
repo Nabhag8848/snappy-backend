@@ -28,8 +28,11 @@ app.get('/', async (req, res) => {
 app.post('/create', async (req, res) => {
     try {
     
-        const inputs = req.body;
-        const modifiers = req.body.modifiers;
+        await formatData(req);
+        const inputs = req.body.data;
+        const modifiers = req.body.data.modifiers;
+
+        console.log(inputs);
 
         if(modifiers != undefined){
             modifiers.forEach(modifier => {
@@ -37,10 +40,11 @@ app.post('/create', async (req, res) => {
             });
         }
 
-        if(req.body.prompt == undefined){
+        if(req.body.data.prompt == undefined){
             throw new Error('Prompt is Required!');
         }
 
+        
         const replicate = new Replicate({token: 'e7ad52e483a88e9adf53be0c240bd66948c63085' });
         const stableDiffusion = await replicate.models.get('stability-ai/stable-diffusion');
         const stableDiffusionPrediction = await stableDiffusion.predict(inputs);
@@ -50,7 +54,8 @@ app.post('/create', async (req, res) => {
 
     }
     catch(err){
-        console.log('err')
+        console.log('err: ');
+        console.log(err)
         res.status(400).send(err);
     }
    
@@ -59,8 +64,12 @@ app.post('/create', async (req, res) => {
 app.post('/create-url', async (req, res) => {
 
     try {
-    
-        const inputs = req.body;
+        
+        await formatData(req);
+        const inputs = req.body.data;
+
+        console.log(inputs);
+        
         const replicate = new Replicate({token: 'e7ad52e483a88e9adf53be0c240bd66948c63085' });
         const stableDiffusion = await replicate.models.get('stability-ai/stable-diffusion');
         const stableDiffusionPrediction = await stableDiffusion.predict(inputs);
@@ -69,7 +78,8 @@ app.post('/create-url', async (req, res) => {
 
     }
     catch(err){
-        console.log('err')
+        console.log('err');
+        console.log(err);
         res.status(400).send(err);
     }
 })
@@ -97,6 +107,64 @@ app.get('/search/:term', async (req, res) => {
     }
         
 })
+
+async function formatData(request){
+
+    const data = request.body.data;
+    const width= data.width;
+    const height= data.height;
+    const prompt_strength =  data.prompt_strength;
+    const num_outputs = data.num_outputs;
+
+    const num_inference_steps= data.num_inference_steps;
+
+    const guidance_scale = data.guidance_scale;
+    const seed = data.seed;
+
+
+    if(width){
+        request.body.data.width = parseInt(request.body.data.width);
+    }else{
+        delete request.body.data.width;
+    }
+
+    if(height){
+        request.body.data.height = parseInt(request.body.data.height);
+    }else{
+        delete request.body.data.height;
+    }
+
+    if(prompt_strength){
+        request.body.data.prompt_strength = parseFloat(request.body.data.prompt_strength)
+    }else{
+        delete request.body.data.prompt_strength;
+    }
+
+    if(num_outputs){
+        request.body.data.num_outputs = parseInt(request.body.data.num_outputs);
+    }else{
+        delete request.body.data.num_outputs;
+    }
+
+    if(num_inference_steps){
+        request.body.data.num_inference_steps = parseInt(request.body.data.num_inference_steps);
+    }else{
+        delete request.body.data.num_inference_steps;
+    }
+
+    if(guidance_scale){
+        request.body.data.guidance_scale = parseFloat(request.body.data.guidance_scale);
+    }else{
+        delete request.body.data.guidance_scale;
+    }
+
+    if(seed){
+        request.body.data.seed = parseInt(request.body.data.seed);
+    }else{
+        delete request.body.data.seed;
+    }
+
+}
 
 // app.get('/generate-keys', (req, res) => {
 //     try {
