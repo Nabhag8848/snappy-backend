@@ -10,12 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cloudinary": "^1.32.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.1",
     "image-to-base64": "^2.2.0",
     "node-fetch": "^3.2.10",
-    "replicate-js": "github:nicholascelestin/replicate-js"
+    "replicate-js": "github:nicholascelestin/replicate-js",
+    "unique-filename": "^2.0.1"
   },
   "type": "module"
 }

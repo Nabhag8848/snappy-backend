@@ -1,11 +1,19 @@
 import express from 'express';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 import Replicate from 'replicate-js';
 import * as dotenv from 'dotenv';
 dotenv.config()
 import fetch from 'node-fetch'
+import cloudinary from 'cloudinary';
+
 // import crypto from 'crypto';
+
+cloudinary.v2.config({
+    cloud_name: process.env.cloud_name,
+    api_key: process.env.api_key ,
+    api_secret: process.env.api_secret
+
+})
 
 import { imagetobase64 } from './image.js';
 // import { base64URLEncodeI, sha256 } from './services/authorization.js';
@@ -13,8 +21,8 @@ import { imagetobase64 } from './image.js';
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb', extended: true, parameterLimit: 50000}));
 
 const PORT = process.env.PORT || 5000;
 
@@ -40,17 +48,22 @@ app.post('/create', async (req, res) => {
             });
         }
 
-        if(req.body.data.prompt == undefined){
+        if(req.body.data.prompt == undefined){  
             throw new Error('Prompt is Required!');
         }
 
         
         const replicate = new Replicate({token: 'e7ad52e483a88e9adf53be0c240bd66948c63085' });
         const stableDiffusion = await replicate.models.get('stability-ai/stable-diffusion');
-        const stableDiffusionPrediction = await stableDiffusion.predict(inputs);
-        const Base64 = await imagetobase64(stableDiffusionPrediction[0]);
 
-        res.status(200).send(Base64);
+        const stableDiffusionPrediction = await stableDiffusion.predict(inputs);
+        setTimeout(async () => {
+
+            const Base64 = await imagetobase64(stableDiffusionPrediction[0]);
+
+            res.status(200).send(Base64);
+        }, 1000);
+            
 
     }
     catch(err){
@@ -61,6 +74,12 @@ app.post('/create', async (req, res) => {
    
 })
 
+async function uploadImage(imageBase64) {
+    const uploadResponse = await cloudinary.v2.uploader.upload(imageBase64, {})
+    console.log(uploadResponse); 
+    return uploadResponse;
+}
+
 app.post('/create-url', async (req, res) => {
 
     try {
@@ -69,7 +88,7 @@ app.post('/create-url', async (req, res) => {
         const inputs = req.body.data;
 
         console.log(inputs);
-        
+
         const replicate = new Replicate({token: 'e7ad52e483a88e9adf53be0c240bd66948c63085' });
         const stableDiffusion = await replicate.models.get('stability-ai/stable-diffusion');
         const stableDiffusionPrediction = await stableDiffusion.predict(inputs);
@@ -111,7 +130,7 @@ app.get('/search/:term', async (req, res) => {
 async function formatData(request){
 
     const data = request.body.data;
-    const width= data.width;
+    const width = data.width;
     const height= data.height;
     const prompt_strength =  data.prompt_strength;
     const num_outputs = data.num_outputs;
@@ -120,6 +139,8 @@ async function formatData(request){
 
     const guidance_scale = data.guidance_scale;
     const seed = data.seed;
+
+    const init_image = data.init_image;
 
 
     if(width){
@@ -163,6 +184,18 @@ async function formatData(request){
     }else{
         delete request.body.data.seed;
     }
+
+    console.log(typeof init_image)
+
+    if(!init_image){
+        delete request.body.data.init_image;
+    }else {
+
+        const img_res = await uploadImage(init_image);
+        const url = img_res.secure_url.replace('.svg', '.png');
+        request.body.data.init_image = url;
+    }
+
 
 }
 
