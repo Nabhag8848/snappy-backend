@@ -53,9 +53,9 @@ app.post('/create', async (req, res) => {
         }
 
         
-        const replicate = new Replicate({token: 'e7ad52e483a88e9adf53be0c240bd66948c63085' });
+        const replicate = new Replicate({token: process.env.REPLICATE_TOKEN});
         const stableDiffusion = await replicate.models.get('stability-ai/stable-diffusion');
-
+        
         const stableDiffusionPrediction = await stableDiffusion.predict(inputs);
         setTimeout(async () => {
 
@@ -89,7 +89,7 @@ app.post('/create-url', async (req, res) => {
 
         console.log(inputs);
 
-        const replicate = new Replicate({token: 'e7ad52e483a88e9adf53be0c240bd66948c63085' });
+        const replicate = new Replicate({token: process.env.REPLICATE_TOKEN});
         const stableDiffusion = await replicate.models.get('stability-ai/stable-diffusion');
         const stableDiffusionPrediction = await stableDiffusion.predict(inputs);
 
@@ -289,13 +289,14 @@ app.post('/image', async (req, res) => {
 
     const inputs = req.body;
 
-    const replicate = new Replicate({token: 'e7ad52e483a88e9adf53be0c240bd66948c63085'});
+    const replicate = new Replicate({token: process.env.REPLICATE_TOKEN});
     const stableDiffusion = await replicate.models.get('stability-ai/stable-diffusion');
     const stableDiffusionPrediction = await stableDiffusion.predict(inputs);
     // const Base64 = await imagetobase64(stableDiffusionPrediction);
     console.log(stableDiffusionPrediction)
     res.status(200).send(stableDiffusionPrediction);
 })
+
 app.listen(PORT, () => {
     console.log(`Server is up and running on PORT: ${PORT}`);
 })

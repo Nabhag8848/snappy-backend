@@ -1,0 +1,31 @@
+Hii Build00rs  👋🏻
+
+I am [Irfan](https://twitter.com/irffanasiff). I along with my friend [Jay](https://twitter.com/mewtyunjay) built this plugin. We named it [Snappy](https://snappy-plugin.com).
+
+**Features:**
+
+- Generate Images from **text**.
+- **Customizing** different fields gives more control on generated images and more customization such as Style Modifiers and Prompt enhancer on the way.
+- Use **reference images / ruff sketches** to get better images out of them.
+- Explore images from lexica, use them in figma or see them for inspiration and prompt ideas.
+- A prompt guide and also we are adding prompt engineering to help users write better prompts.
+- Generate multiple images in a single click. Render them inside different shapes in figma directly.
+
+**Next:**
+
+- [ ]  Auth implementation ( almost done )
+- [ ]  Payment Integration
+- [ ]  Working on reducing image load time in general.
+- [ ]  Less loading time for generating next image using smart queue with keyboard shortcut
+
+We are also working on a **smart queue** feature where in the load time for generating next image is drastically reduced if the user is not satisfied with the current generation and wants another one.
+
+- [ ]  Talk to users/companies for more features + feedback
+
+**Links :**
+
+- Website - [Snappy-plugin.com](https://snappy-plugin.com)
+- Github - Open sourcing it when beta version is launched.
+- Figma - Under review
+- Video Demo
+<https://www.loom.com/share/eb0ee505190c4ec2b001a5a16bd45e09>
