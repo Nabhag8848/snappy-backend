@@ -11,13 +11,23 @@
   "license": "ISC",
   "dependencies": {
     "cloudinary": "^1.32.0",
+    "compress-str": "^1.0.2",
+    "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.1",
+    "express-jwt": "^7.7.5",
+    "express-longpoll": "^0.0.6",
+    "i": "^0.3.7",
     "image-to-base64": "^2.2.0",
+    "jwks-rsa": "^2.1.5",
+    "mongoose": "^6.6.5",
     "node-fetch": "^3.2.10",
+    "npm": "^8.19.2",
+    "redis": "^4.3.1",
     "replicate-js": "github:nicholascelestin/replicate-js",
-    "unique-filename": "^2.0.1"
+    "unique-filename": "^2.0.1",
+    "util.promisify": "^1.1.1"
   },
   "type": "module"
 }
