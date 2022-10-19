@@ -33,8 +33,39 @@ appolling.create('/auth/:figmaId', ( req, res, next) => {
 appolling.publish('/auth/:figmaId', 'ping');
 
 setInterval(function () {
+    console.log('running')
     appolling.publish('/auth/:figmaId', 'ping');
-}, 10000);
+}, 3000);
+
+app.post('/token', async ( req, res ) => {
+
+    try{
+
+        const figmaId = req.body.figmaId;
+        const token = req.body.access_token;
+    
+        const response = await redisClient.set(figmaId, token);
+
+        if(response == "OK"){
+
+            appolling.publishToId('/auth/:figmaId', figmaId, {
+                figmaId,
+                token
+            });
+
+           res.status(200).send("Published");
+            // longpolling
+          
+            return;
+        }
+
+        res.status(500).send("problem storing");
+
+    }catch(err){
+        res.status(400).send(err);
+    }
+   
+})
 
 
 app.get('/', async (req, res) => {
@@ -184,33 +215,7 @@ app.post('/image', async (req, res) => {
     res.status(200).send(stableDiffusionPrediction);
 })
 
-app.post('/token', async ( req, res ) => {
 
-    try{
-
-        const figmaId = req.body.figmaId;
-        const token = req.body.access_token;
-    
-        const response = await redisClient.set(figmaId, token);
-
-        if(response == "OK"){
-           res.status(200).send("Stored Succesfully");
-            // longpolling
-            appolling.publish('/auth/:figmaId', {
-                figmaId,
-                token
-            });
-
-            return;
-        }
-
-        res.status(500).send("problem storing");
-
-    }catch(err){
-        res.status(400).send(err);
-    }
-   
-})
 
 app.use((req, res, next) => {
     res.status(404).send('404 Not found');   
