@@ -28,13 +28,13 @@ appolling.create('/auth/:figmaId', ( req, res, next) => {
     next();
 });
 
-const data = { text: 'sending every 3 second'};
+// const data = { text: 'sending every 3 second'};
 
-appolling.publish('/auth/:figmaId', data);
+// appolling.publish('/auth/:figmaId', data);
 
-setInterval(function () {
-    appolling.publish('/auth/:figmaId', data);
-}, 3000);
+// setInterval(function () {
+//     appolling.publish('/auth/:figmaId', data);
+// }, 3000);
 
 
 app.get('/', async (req, res) => {
@@ -194,7 +194,14 @@ app.post('/token', async ( req, res ) => {
         const response = await redisClient.set(figmaId, token);
 
         if(response == "OK"){
-           return res.status(200).send("Stored Succesfully");
+           res.status(200).send("Stored Succesfully");
+            // longpolling
+            appolling.publish('/auth/:figmaId', {
+                figmaId,
+                token
+            });
+
+            return;
         }
 
         res.status(500).send("problem storing");
