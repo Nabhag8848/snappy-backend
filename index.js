@@ -30,7 +30,7 @@ appolling.create('/auth/:figmaId', ( req, res, next) => {
 
 // const data = { text: 'sending every 3 second'};
 
-// appolling.publish('/auth/:figmaId', data);
+appolling.publish('/auth/:figmaId', 'ping');
 
 setInterval(function () {
     appolling.publish('/auth/:figmaId', 'ping');
