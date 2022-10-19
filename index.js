@@ -32,9 +32,9 @@ appolling.create('/auth/:figmaId', ( req, res, next) => {
 
 // appolling.publish('/auth/:figmaId', data);
 
-// setInterval(function () {
-//     appolling.publish('/auth/:figmaId', data);
-// }, 3000);
+setInterval(function () {
+    appolling.publish('/auth/:figmaId', 'ping');
+}, 10000);
 
 
 app.get('/', async (req, res) => {
