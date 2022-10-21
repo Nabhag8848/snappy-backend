@@ -11,7 +11,7 @@ const verifyJwt = expressjwt({
         jwksUri: `${process.env.ISSUER}/.well-known/jwks.json`
     }),
     audience: `${process.env.AUDIENCE}`,
-    issuer: `${process.env.ISSUER}`,
+    issuer: `${process.env.ISSUER}/`, // note the slash gives error if not there
     algorithms: ['RS256']
 })
 

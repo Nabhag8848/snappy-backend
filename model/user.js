@@ -5,7 +5,6 @@ import validator from 'validator';
 connect();
 
 const userSchema = new Schema({
-//    userFigmaId: String
     username: {
         type:String,
         required:true,
