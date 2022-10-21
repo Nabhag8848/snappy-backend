@@ -11,6 +11,8 @@ import { verifyJwt } from './auth/auth.js';
 import longpoll from 'express-longpoll';
 import {connect, redisClient} from './db/connection.js';
 
+import {User} from './model/user.js';
+
 const app = express();
 const appolling = longpoll(app);
 const PORT = process.env.PORT || 5000;
@@ -20,48 +22,51 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
 connect(); // redis connection
 // app.use(compression());
-
 appolling.create('/auth/:figmaId', ( req, res, next) => {
     console.log(req.params.figmaId)
-    console.log('run');
     req.id =req.params.figmaId;
     next();
 });
 
-// const data = { text: 'sending every 3 second'};
-
 appolling.publish('/auth/:figmaId', 'ping');
 
 setInterval(function () {
-    console.log('running')
     appolling.publish('/auth/:figmaId', 'ping');
 }, 3000);
 
 app.post('/token', async ( req, res ) => {
 
     try{
+        console.log('body: ', req.body);
+
+        const user = await User.isUserExist(req.body.user);
 
         const figmaId = req.body.figmaId;
         const token = req.body.access_token;
+
+        // console.log(figmaId, '  ane  ', token)
     
-        const response = await redisClient.set(figmaId, token);
+        // const response = await redisClient.set(figmaId, token);
+        // console.log('response' ,response);
+        console.log(user);
 
-        if(response == "OK"){
-
+        if(user){
+        // if(response == "OK"){
+            console.log('publish run')
             appolling.publishToId('/auth/:figmaId', figmaId, {
                 figmaId,
-                token
+                token,
+                user
             });
 
-           res.status(200).send("Published");
-            // longpolling
+            return res.status(200).send("published");
           
-            return;
         }
 
-        res.status(500).send("problem storing");
+      return res.status(500).send("problem storing");
 
     }catch(err){
+        console.log(err);
         res.status(400).send(err);
     }
    
@@ -204,6 +209,12 @@ app.get('/search/:term', verifyJwt, async (req, res) => {
         res.status(400).send(err);
     }
         
+})
+
+app.get('/profile/:username', async (req ,res) => {
+    
+
+    
 })
 
 app.post('/image', async (req, res) => {
