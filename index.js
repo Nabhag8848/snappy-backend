@@ -206,13 +206,13 @@ app.get('/search/:term', verifyJwt, async (req, res) => {
         
 })
 
-app.get('/profile/:id', async (req ,res) => {
+app.get('/profile/:id', verifyJwt, async (req ,res) => {
     
     try{
         
 
         //error handling of id length should be done
-
+        
         const _id = req.params.id; // change to Id Later
         const user = await User.findOne({_id}); // change to Id later
 
