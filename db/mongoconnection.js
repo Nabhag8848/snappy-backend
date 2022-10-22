@@ -8,4 +8,4 @@ async function connect(){
     const connection = await mongoose.connect(mongoUri);
 }
 
-export {connect};
+export {connect, mongoose};

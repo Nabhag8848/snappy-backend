@@ -4,26 +4,34 @@ import Replicate from 'replicate-js';
 import * as dotenv from 'dotenv';
 dotenv.config();
 import fetch from 'node-fetch';
-// import compression from 'compression';
+import compression from 'compression';
 import { imagetobase64 } from './image.js';
 import { formatData }  from './image.js';
-import { verifyJwt } from './auth/auth.js';
+import { verifyJwt, verifyUser } from './auth/auth.js';
 import longpoll from 'express-longpoll';
 import {connect, redisClient} from './db/connection.js';
-
 import {User} from './model/user.js';
+import {mongoose} from './db/mongoconnection.js';
+import { JwksRateLimitError } from 'jwks-rsa';
+import { getUserIdFromToken, VerifySecretFromToken,getUserIdFromSub } from './services/authorization.js';
 
 const app = express();
 const appolling = longpoll(app);
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+    credentials:true,
+    allowedHeaders: ["Authorization", "Content-Type"]
+}));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
-// connect(); // redis connection
-// app.use(compression());
+
+app.use(verifyJwt.unless({
+    path: ["/token", new RegExp("^/auth"), "/"]
+}));
+app.use(compression());
 appolling.create('/auth/:code', ( req, res, next) => {
-    console.log(req.params.code)
     req.id =req.params.code;
     next();
 });
@@ -39,13 +47,17 @@ app.post('/token', async ( req, res ) => {
     try{
         console.log('body: ', req.body);
 
-        const user = await User.isUserExist(req.body.user);
+        const user = await User.isUserExist(req.body.user, req.body.access_token);
 
         const code = req.body.code;
         const token = req.body.access_token;
 
-    
-        console.log(user);
+        if(!VerifySecretFromToken(token)){
+            return res.status(401).send({
+                status:401,
+                description: "couldn't verify the payload secret"
+            });
+        }
 
         if(user){
 
@@ -72,7 +84,7 @@ app.get('/', async (req, res) => {
     res.status(200).send('Health Check');
 })
 
-app.post('/create', async (req, res) => {
+app.post('/create/:id', verifyUser, async (req, res) => {
     try {
 
         console.log('run');
@@ -140,7 +152,7 @@ app.post('/create', async (req, res) => {
    
 })
 
-app.post('/create-url', async (req, res) => {
+app.post('/create-url/:id', verifyUser ,async (req, res) => {
 
     try {
         
@@ -183,7 +195,7 @@ app.post('/create-url', async (req, res) => {
     }
 })
  
-app.get('/search/:term', verifyJwt, async (req, res) => {
+app.get('/search/:term',async (req, res) => {
 
     try{
 
@@ -206,16 +218,21 @@ app.get('/search/:term', verifyJwt, async (req, res) => {
         
 })
 
-app.get('/profile/:id', verifyJwt, async (req ,res) => {
+app.get('/profile/:id', verifyUser, async (req ,res) => {
     
     try{
         
+        const _id = req.params.id; 
 
-        //error handling of id length should be done
-        
-        const _id = req.params.id; // change to Id Later
-        const user = await User.findOne({_id}); // change to Id later
+        if(!mongoose.isObjectIdOrHexString(_id)){
+            return res.status(400).send({
+                status:400,
+                response: 'Not a valid id'
+            });
+        }
 
+        const user = await User.findOne({_id});
+     
         if(!user){
             return res.send({
                 status:200,
@@ -230,10 +247,9 @@ app.get('/profile/:id', verifyJwt, async (req ,res) => {
         res.status(400).send(err);
     }
 
-    
 })
 
-app.post('/image', async (req, res) => {
+app.post('/image/:id', verifyUser, async (req, res) => {
 
     const inputs = req.body;
     const replicate = new Replicate({token: process.env.REPLICATE_TOKEN});

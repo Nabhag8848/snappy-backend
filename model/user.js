@@ -1,12 +1,20 @@
 import mongoose,{ Schema } from "mongoose";
 import {connect} from '../db/mongoconnection.js';
 import validator from 'validator';
+import {getUserIdFromToken} from '../services/authorization.js';
 
 connect();
 
 const userSchema = new Schema({
+    user_id: {
+        type:String,
+        unique:true,
+        required:true,
+        trim:true,
+    },
     username: {
         type:String,
+        unique:true,
         required:true,
         trim:true
     },
@@ -91,7 +99,7 @@ userSchema.statics.isUserExist = async function({
     name,
     nickname,
     picture,
-}) {
+}, access_token) {
     
     try{
         console.log(email)
@@ -99,8 +107,9 @@ userSchema.statics.isUserExist = async function({
         console.log('finding user', user);
 
         if(!user){
-            
+            const user_id = getUserIdFromToken(access_token);
             const newUser = User.create({
+                user_id,
                 username:nickname,
                 email,
                 name,
