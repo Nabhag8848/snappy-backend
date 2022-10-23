@@ -35,7 +35,7 @@ app.use(verifyJwt.unless({
     path: ["/token", new RegExp("^/auth"), "/"]
 }));
 // app.use(compression());
-appolling.create('/auth/:code', cors(), ( req, res, next) => {
+appolling.create('/auth/:code', ( req, res, next) => {
     req.id =req.params.code;
     next();
 });
