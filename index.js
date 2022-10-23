@@ -5,12 +5,12 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import fetch from 'node-fetch';
 import compression from 'compression';
-import { imagetobase64 } from './image.js';
+import { imagetobase64,getRequiredImageObject } from './image.js';
 import { formatData }  from './image.js';
 import { verifyJwt, verifyUser } from './auth/auth.js';
 import longpoll from 'express-longpoll';
 import {connect, redisClient} from './db/connection.js';
-import {User} from './model/user.js';
+import {User, Images} from './model/user.js';
 import {mongoose} from './db/mongoconnection.js';
 import { JwksRateLimitError } from 'jwks-rsa';
 import { getUserIdFromToken, VerifySecretFromToken,getUserIdFromSub } from './services/authorization.js';
@@ -35,7 +35,6 @@ appolling.create('/auth/:code', ( req, res, next) => {
     req.id =req.params.code;
     next();
 });
-
 appolling.publish('/auth/:code', 'ping');
 
 setInterval(function () {
@@ -88,6 +87,7 @@ app.post('/create/:id', verifyUser, async (req, res) => {
     try {
 
         console.log('run');
+        const id = req.params.id;
         const gotFormat = await formatData(req);
 
         if(gotFormat != true){
@@ -141,12 +141,29 @@ app.post('/create/:id', verifyUser, async (req, res) => {
 
         const predictionUrl = stableDiffusionPrediction[0];
         console.log('predictionUrl: ', predictionUrl);
+
+        const imgObject = getRequiredImageObject(id, inputs, predictionUrl);
+
+        const image = new Images(imgObject);
+
+        await image.save();
+
+        const result = await User.findOne({"_id": id});
+        result.user_platform.user_platform_images.push(image);
+        result.user_images.push(image);
+        const len = result.user_platform.user_platform_images.length
+        result.user_platform.number_of_images_generated = len;
+        await result.save();
+
+        console.log('Result: ', result);
+
         const Base64 = await imagetobase64(predictionUrl);
         res.status(200).send(Base64);
 
     }
 
     catch(err){
+        console.log(err);
         res.status(400).send(err);
     }
    
@@ -155,7 +172,7 @@ app.post('/create/:id', verifyUser, async (req, res) => {
 app.post('/create-url/:id', verifyUser ,async (req, res) => {
 
     try {
-        
+        const id = req.params.id;
         const gotFormat = await formatData(req);
 
         if(gotFormat != true){
@@ -185,11 +202,24 @@ app.post('/create-url/:id', verifyUser ,async (req, res) => {
 
         }
 
+        const predictionUrl = stableDiffusionPrediction[0];
+        const imgObject = getRequiredImageObject(id, inputs, predictionUrl);
+        const image = new Images(imgObject);
+
+        await image.save();
+
+        const result = await User.findOne({"_id": id});
+        result.user_platform.user_platform_images.push(image);
+        result.user_images.push(image);
+        const len = result.user_platform.user_platform_images.length
+        result.user_platform.number_of_images_generated = len;
+        await result.save();
+
+        console.log('Result: ', result);
         res.status(200).send(stableDiffusionPrediction);
 
     }
     catch(err){
-        console.log('err');
         console.log(err);
         res.status(400).send(err);
     }

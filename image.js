@@ -103,10 +103,81 @@ async function formatData(request){
     }
 }
 
+function getRequiredImageObject(id, inputs, predictionUrl){
+
+    try {
+        const width = inputs.width;
+        const height= inputs.height;
+        const num_inference_steps= inputs.num_inference_steps;
+        const guidance_scale = inputs.guidance_scale;
+        const seed = inputs.seed;
+        const init_image = inputs.init_image;
+        const prompt = inputs.prompt;
+    
+        const object = { 
+            image_url: predictionUrl,
+            generatedBy: id,
+            type: "TEXT_TO_IMAGE",
+            prompt: prompt,
+            seed,
+            customizations: {
+                guidance_scale,
+                height,
+                num_inference_steps,
+                width,
+            } 
+        }
+        
+        if(width){
+            object.customizations.width = parseInt(object.customizations.width);
+        }else{
+            delete object.customizations.width;
+        }
+    
+        if(height){
+            object.customizations.height = parseInt(object.customizations.height);
+        }else{
+            delete object.customizations.height;
+        }
+    
+        if(num_inference_steps){
+            object.customizations.num_inference_steps = parseInt(object.customizations.num_inference_steps);
+        }else{
+            delete object.customizations.num_inference_steps;
+        }
+    
+        if(guidance_scale){
+            object.customizations.guidance_scale = parseFloat(object.customizations.guidance_scale);
+        }else{
+            delete object.customizations.guidance_scale;
+        }
+    
+        if(seed){
+            object.seed = parseInt(object.seed);
+        }else{
+            delete object.seed;
+        }
+        
+        if(object.customizations == { }){
+            delete object.customizations;
+        }
+    
+        if(init_image){
+            object.type = "IMAGE_TO_IMAGE"
+        }
+    
+        return object;
+
+    }catch(err){
+        throw new Error(err);
+    }
+
+  
+}
+
 async function uploadImage(imageBase64) {
     const uploadResponse = await cloudinary.v2.uploader.upload(imageBase64, {})
-    console.log(uploadResponse); 
     return uploadResponse;
 }
 
-export { formatData }
+export { formatData, getRequiredImageObject };

@@ -35,7 +35,7 @@ const userSchema = new Schema({
         }
     },
     picture:{ type: String},
-    isPro: { type: Boolean, default: false },
+    isPro: { type: Boolean, default: false }, 
     user_platform: {
         name: {
             type: String, 
@@ -45,20 +45,23 @@ const userSchema = new Schema({
         },
         id: String,
         access_allowed: Boolean,
-        number_of_images_generated: Number,
+        number_of_images_generated: {
+            type: Number,
+            default: 0
+        },
         user_platform_images:  [{
-            imageSchema: {
-                type: Schema.Types.ObjectId, ref: 'Images'
+            imagesSchema:{ 
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Images'
             }
+        }]
+    }, 
+    user_images: [{
+        imagesSchema:{ 
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Images'
         }
-        ]
-    },
-    user_images:  [{
-        imageSchema: {
-            type: Schema.Types.ObjectId, ref: 'Images'
-        }
-    }
-    ],
+    }]
     // user ka account ka credentials b store krna ka usna login with kia use kia ha login with figma ya google ya twitter schema ma 
 },{
     timestamps: true,
@@ -66,16 +69,22 @@ const userSchema = new Schema({
 
 const imagesSchema = new Schema({
     image_url: { type: String, require: true },
+    generatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     type: {
         type: String, 
         enum: ['IMAGE_TO_IMAGE', 'TEXT_TO_IMAGE'], 
-        require: true },
+        require: true,
+        default:'TEXT_TO_IMAGE'
+    },
     prompt: {
         type: String, 
         require: true
     },
     seed: {
-        type: String
+        type: Number
     },
     customizations: {
         guidance_scale: Number,
@@ -92,7 +101,7 @@ const imagesSchema = new Schema({
     
 },{
         timestamps: true,
-    })
+})
 
 userSchema.statics.isUserExist = async function({
     email,
