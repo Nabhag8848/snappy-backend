@@ -4,7 +4,7 @@ import Replicate from 'replicate-js';
 import * as dotenv from 'dotenv';
 dotenv.config();
 import fetch from 'node-fetch';
-import compression from 'compression';
+// import compression from 'compression';
 import { imagetobase64,getRequiredImageObject } from './image.js';
 import { formatData }  from './image.js';
 import { verifyJwt, verifyUser } from './auth/auth.js';
@@ -21,7 +21,10 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors({
     credentials:true,
-    allowedHeaders: ["Authorization", "Content-Type"]
+    origin: "*",
+    allowedHeaders: ["Authorization", "Content-Type"],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    preflightContinue: false,
 }));
 
 app.use(express.json({ limit: '50mb' }));
@@ -30,7 +33,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 5000
 app.use(verifyJwt.unless({
     path: ["/token", new RegExp("^/auth"), "/"]
 }));
-app.use(compression());
+// app.use(compression());
 appolling.create('/auth/:code', ( req, res, next) => {
     req.id =req.params.code;
     next();
@@ -88,6 +91,18 @@ app.post('/create/:id', verifyUser, async (req, res) => {
 
         console.log('run');
         const id = req.params.id;
+
+        const result = await User.findOne({"_id": id});
+
+        const len = result.user_platform.user_platform_images.length;
+
+        if(len >= 30 && result.isPro == false){ // need to think if user has expired plan and configure the change
+            return res.status(429).send({
+                status:429,
+                message: "Free tier limit exceeded"
+            })
+        }
+
         const gotFormat = await formatData(req);
 
         if(gotFormat != true){
@@ -148,11 +163,9 @@ app.post('/create/:id', verifyUser, async (req, res) => {
 
         await image.save();
 
-        const result = await User.findOne({"_id": id});
         result.user_platform.user_platform_images.push(image);
         result.user_images.push(image);
-        const len = result.user_platform.user_platform_images.length
-        result.user_platform.number_of_images_generated = len;
+        result.user_platform.number_of_images_generated = len + 1;
         await result.save();
 
         console.log('Result: ', result);
@@ -173,6 +186,18 @@ app.post('/create-url/:id', verifyUser ,async (req, res) => {
 
     try {
         const id = req.params.id;
+
+        const result = await User.findOne({"_id": id});
+
+        const len = result.user_platform.user_platform_images.length;
+
+        if(len >= 30 && result.isPro == false){ // need to think if user has expired plan and configure the change
+            return res.status(429).send({
+                status:429,
+                message: "Free tier limit exceeded"
+            })
+        }
+
         const gotFormat = await formatData(req);
 
         if(gotFormat != true){
@@ -208,11 +233,9 @@ app.post('/create-url/:id', verifyUser ,async (req, res) => {
 
         await image.save();
 
-        const result = await User.findOne({"_id": id});
         result.user_platform.user_platform_images.push(image);
         result.user_images.push(image);
-        const len = result.user_platform.user_platform_images.length
-        result.user_platform.number_of_images_generated = len;
+        result.user_platform.number_of_images_generated = len + 1;
         await result.save();
 
         console.log('Result: ', result);
