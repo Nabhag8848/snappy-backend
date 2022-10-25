@@ -158,21 +158,21 @@ app.post('/create/:id', verifyUser, async (req, res) => {
         const predictionUrl = stableDiffusionPrediction[0];
         console.log('predictionUrl: ', predictionUrl);
 
-        const imgObject = getRequiredImageObject(id, inputs, predictionUrl);
+        //const imgObject = getRequiredImageObject(id, inputs, predictionUrl);
 
-        const image = new Images(imgObject);
+        //const image = new Images(imgObject);
 
-        await image.save();
+        //await image.save();
 
-        result.user_platform.user_platform_images.push(image);
-        result.user_images.push(image);
+        result.user_platform.user_platform_images.push(predictionUrl);
+        result.user_images.push(predictionUrl);
         result.user_platform.number_of_images_generated = len + 1;
         await result.save();
 
         console.log('Result: ', result);
 
-        const Base64 = await imagetobase64(predictionUrl);
-        res.status(200).send(Base64);
+        //const Base64 = await imagetobase64(predictionUrl);
+        res.status(200).send(predictionUrl); // -> send directly the url no need for base64 converion <-
 
     }
 
