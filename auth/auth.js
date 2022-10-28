@@ -42,4 +42,37 @@ const verifyUser = async function (req, res, next) {
     }
 }
 
-export { verifyJwt,verifyUser }
+const verifyUserAndValidity = async function (req , res , next ) {
+
+    try {
+
+        const _id = req.params.id; 
+        const payload = req.auth;
+
+        const user = await User.findOne({_id});
+        const user_id = user.user_id;
+        const access_allowed = user.access_allowed;
+
+        const reqUserId = getUserIdFromSub(payload);
+
+        if(reqUserId !== user_id){
+            return res.status(401).send({
+                status:401,
+                response: "User not verified"
+            });
+        }
+
+        if(!access_allowed){
+            return res.status(429).send({
+                status:429,
+                message: "Free tier limit exceeded"
+            })
+        }
+
+        next();
+    }catch(err){
+       return res.status(400).send(err);
+    }
+}
+
+export { verifyJwt,verifyUser, verifyUserAndValidity }

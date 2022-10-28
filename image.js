@@ -43,8 +43,6 @@ async function formatData(request){
         const seed = data.seed;
     
         const init_image = data.init_image;
-    
-    
         if(width){
             request.body.data.width = parseInt(request.body.data.width);
         }else{
@@ -99,11 +97,12 @@ async function formatData(request){
         return true;
 
     }catch (err){
+        console.log(err)
        return err;
     }
 }
 
-function getRequiredImageObject(id, inputs, predictionUrl){
+async function getRequiredImageObject(inputs, predictionUrl){
 
     try {
         const width = inputs.width;
@@ -116,9 +115,8 @@ function getRequiredImageObject(id, inputs, predictionUrl){
     
         const object = { 
             image_url: predictionUrl,
-            generatedBy: id,
             type: "TEXT_TO_IMAGE",
-            prompt: prompt,
+            prompt,
             seed,
             customizations: {
                 guidance_scale,
@@ -165,7 +163,8 @@ function getRequiredImageObject(id, inputs, predictionUrl){
         if(init_image){
             object.type = "IMAGE_TO_IMAGE"
         }
-    
+        
+        console.log('OBJECT: ', object);
         return object;
 
     }catch(err){
