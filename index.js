@@ -7,9 +7,9 @@ import fetch from 'node-fetch';
 // import compression from 'compression';
 import { imagetobase64,getRequiredImageObject } from './image.js';
 import { formatData }  from './image.js';
-import { verifyJwt, verifyUser } from './auth/auth.js';
+import { verifyJwt, verifyUser, verifyUserAndValidity } from './auth/auth.js';
 import longpoll from 'express-longpoll';
-import {connect, redisClient} from './db/connection.js';
+// import {connect, redisClient} from './db/connection.js';
 import {User, Images} from './model/user.js';
 import {mongoose} from './db/mongoconnection.js';
 import { JwksRateLimitError } from 'jwks-rsa';
@@ -87,21 +87,28 @@ app.get('/', async (req, res) => {
     res.status(200).send('Health Check');
 })
 
-app.post('/create/:id', verifyUser, async (req, res) => {
+app.post('/create/:id', verifyUserAndValidity, async (req, res) => {
     try {
 
         console.log('run');
         const id = req.params.id;
 
-        const result = await User.findOne({"_id": id});
+        // const result = await User.findOne({"_id": id}).select('access_allowed');
 
-        const len = result.user_platform.user_platform_images.length;
+        // const len = result.user_platform.user_platform_images.length;
 
-        if(len >= 30 && result.isPro == false){ // need to think if user has expired plan and configure the change
-            return res.status(429).send({
-                status:429,
-                message: "Free tier limit exceeded"
-            })
+        // if(len >= 30 && result.isPro == false){ // need to think if user has expired plan and configure the change
+        //     return res.status(429).send({
+        //         status:429,
+        //         message: "Free tier limit exceeded"
+        //     })
+        // }
+
+        if(req.body.data.prompt == undefined){  
+            return res.status(400).send({
+                description: 'Prompt is Required!',
+                status: 400,
+            });
         }
 
         const gotFormat = await formatData(req);
@@ -121,12 +128,6 @@ app.post('/create/:id', verifyUser, async (req, res) => {
             });
         }
 
-        if(req.body.data.prompt == undefined){  
-            return res.status(400).send({
-                description: 'Prompt is Required!',
-                status: 400,
-            });
-        }
         
         const replicate = new Replicate({ token: process.env.REPLICATE_TOKEN });
         const stableDiffusion = await replicate.models.get('stability-ai/stable-diffusion');
@@ -158,21 +159,18 @@ app.post('/create/:id', verifyUser, async (req, res) => {
         const predictionUrl = stableDiffusionPrediction[0];
         console.log('predictionUrl: ', predictionUrl);
 
-        //const imgObject = getRequiredImageObject(id, inputs, predictionUrl);
+        const imgObject = await getRequiredImageObject(inputs, predictionUrl);
 
-        //const image = new Images(imgObject);
-
-        //await image.save();
-
-        result.user_platform.user_platform_images.push(predictionUrl);
-        result.user_images.push(predictionUrl);
-        result.user_platform.number_of_images_generated = len + 1;
+        const result = await Images.findOne({"generatedBy": id});
+        const len = result.user_platform[0].user_platform_images.length;
+        result.user_platform[0].user_platform_images.push(imgObject);
+        result.user_platform[0].number_of_images_generated = len + 1;
         await result.save();
 
         console.log('Result: ', result);
 
-        //const Base64 = await imagetobase64(predictionUrl);
-        res.status(200).send(predictionUrl); // -> send directly the url no need for base64 converion <-
+        // const Base64 = await imagetobase64(predictionUrl);
+        res.status(200).send(predictionUrl);
 
     }
 
@@ -183,21 +181,21 @@ app.post('/create/:id', verifyUser, async (req, res) => {
    
 })
 
-app.post('/create-url/:id', verifyUser ,async (req, res) => {
+app.post('/create-url/:id', verifyUserAndValidity ,async (req, res) => {
 
     try {
         const id = req.params.id;
 
-        const result = await User.findOne({"_id": id});
+        // const result = await User.findOne({"_id": id});
 
-        const len = result.user_platform.user_platform_images.length;
+        // const len = result.user_platform.user_platform_images.length;
 
-        if(len >= 30 && result.isPro == false){ // need to think if user has expired plan and configure the change
-            return res.status(429).send({
-                status:429,
-                message: "Free tier limit exceeded"
-            })
-        }
+        // if(len >= 30 && result.isPro == false){ // need to think if user has expired plan and configure the change
+        //     return res.status(429).send({
+        //         status:429,
+        //         message: "Free tier limit exceeded"
+        //     })
+        // }
 
         const gotFormat = await formatData(req);
 
@@ -301,6 +299,20 @@ app.get('/profile/:id', verifyUser, async (req ,res) => {
         res.status(400).send(err);
     }
 
+    })
+
+app.get('/images/:id', verifyUser, async ( req, res ) => {
+
+    try {
+
+        const id = req.params.id;
+        const images = await Images.find({generatedBy: id});
+
+        res.status(200).send(images);
+    }catch(err){
+        console.error(err);
+        res.status(401).send(err);
+    }
 })
 
 app.post('/image/:id', verifyUser, async (req, res) => {
