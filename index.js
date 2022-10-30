@@ -162,9 +162,13 @@ app.post('/create/:id', verifyUserAndValidity, async (req, res) => {
         const imgObject = await getRequiredImageObject(inputs, predictionUrl);
 
         const result = await Images.findOne({"generatedBy": id});
+        const updateCount = await User.findById(id);
+        updateCount.num_images_generated += 1;
+        await updateCount.save();
         const len = result.user_platform[0].user_platform_images.length;
         result.user_platform[0].user_platform_images.push(imgObject);
         result.user_platform[0].number_of_images_generated = len + 1;
+        result.num_images_generated += 1;
         await result.save();
 
         console.log('Result: ', result);

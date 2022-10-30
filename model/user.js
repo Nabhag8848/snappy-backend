@@ -36,7 +36,11 @@ const userSchema = new Schema({
     },
     picture:{ type: String },
     isPro: { type: Boolean, default: false }, 
-    access_allowed: { type: Boolean, default: true } 
+    access_allowed: { type: Boolean, default: true },
+    num_images_generated: {
+        type: Number,
+        default: 0
+    },
 
     // user ka account ka credentials b store krna ka usna login with kia use kia ha login with figma ya google ya twitter schema ma 
 },{
@@ -47,6 +51,10 @@ const imagesSchema = new Schema({
     generatedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    num_images_generated: {
+        type: Number,
+        default: 0
     },
     user_platform: [{
         name: {
