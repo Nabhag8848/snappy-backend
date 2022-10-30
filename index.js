@@ -126,6 +126,8 @@ app.post('/create/:id', verifyUserAndValidity, async (req, res) => {
             modifiers.forEach(modifier => {
                 inputs.prompt = `${inputs.prompt},${modifier}`
             });
+
+            delete req.body.data.modifiers;
         }
 
         

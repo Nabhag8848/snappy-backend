@@ -61,7 +61,6 @@ const imagesSchema = new Schema({
             type: String, 
             enum: ['FIGMA', 'SKETCH', 'CANVA'],
             require: true,
-            unique: true,
             default: 'FIGMA'
         },
         number_of_images_generated: {
