@@ -5,7 +5,7 @@ dotenv.config();
 import { User } from '../model/user.js';
 import { getUserIdFromSub } from '../services/authorization.js';
 
-const verifyJwt = expressjwt({
+const verify_jwt = expressjwt({
     secret: jwks.expressJwtSecret({
         cache: true,
         rateLimit: true,
@@ -17,7 +17,7 @@ const verifyJwt = expressjwt({
     algorithms: ['RS256']
 })
 
-const verifyUser = async function (req, res, next) {
+const verify_user = async function (req, res, next) {
 
     try {
 
@@ -25,9 +25,9 @@ const verifyUser = async function (req, res, next) {
         const payload = req.auth;
 
         const user = await User.findOne({_id});
-        console.log('User:  ', user);
         const user_id = user.user_id;
-
+        console.log('this req body', req.body);
+        
         const reqUserId = getUserIdFromSub(payload);
 
         if(reqUserId !== user_id){
@@ -36,31 +36,21 @@ const verifyUser = async function (req, res, next) {
                 response: "User not verified"
             });
         }
+        
         next();
     }catch(err){
        return res.status(400).send(err);
     }
 }
 
-const verifyUserAndValidity = async function (req , res , next ) {
+const is_validity_left = async function (req , res , next ) {
 
     try {
 
         const _id = req.params.id; 
-        const payload = req.auth;
 
         const user = await User.findOne({_id});
-        const user_id = user.user_id;
         const access_allowed = user.access_allowed;
-
-        const reqUserId = getUserIdFromSub(payload);
-
-        if(reqUserId !== user_id){
-            return res.status(401).send({
-                status:401,
-                response: "User not verified"
-            });
-        }
 
         if(!access_allowed){
             return res.status(429).send({
@@ -75,4 +65,4 @@ const verifyUserAndValidity = async function (req , res , next ) {
     }
 }
 
-export { verifyJwt,verifyUser, verifyUserAndValidity }
+export { verify_jwt, verify_user, is_validity_left };

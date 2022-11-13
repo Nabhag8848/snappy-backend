@@ -68,10 +68,10 @@ const imagesSchema = new Schema({
             default: 0
         },
         user_platform_images:  [{
-            image_url: { 
+            image_url: [{ 
                 type: String, 
                 require: true 
-            },
+            }],
             createdAt: {
                 type: Date,
                 default: new Date(0)
@@ -86,6 +86,9 @@ const imagesSchema = new Schema({
                 type: String, 
                 require: true
             },
+            negative_prompt: {
+                type: String
+            },
             seed: {
                 type: Number
             },
@@ -94,6 +97,7 @@ const imagesSchema = new Schema({
                 height: Number,
                 num_inference_steps: Number,
                 width: Number,
+                prompt_strength: Number
             },
             requested_from: { 
                 type: String 
