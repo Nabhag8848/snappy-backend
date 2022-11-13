@@ -13,10 +13,7 @@ export async function format(request){
     try {
 
         const data = request.body.data;
-
-        // having keys:
-        data.key = process.env.STABLEDIFFUSIONKEY;
-
+        const prompt = data.prompt;
         const width = data.width;
         const height= data.height;
         const init_image = data.init_image;
@@ -26,57 +23,72 @@ export async function format(request){
         const seed = data.seed;
         const samples = data.samples;
         const negative_prompt = data.negative_prompt;
+        const webhook = `${process.env.WEBHOOK}/images/webhook`;
 
-        if(!width){
-            delete request.body.data.width;
+        const object = {
+            key: process.env.STABLEDIFFUSIONKEY,
+            prompt,
+            height,
+            width,
+            init_image,
+            prompt_strength,
+            num_inference_steps,
+            guidance_scale,
+            seed,
+            samples,
+            negative_prompt,
+            webhook
+        }
+
+        if(object.width === undefined){
+            delete object.width;
         }
         
-        if(!height){
-            delete request.body.data.height;
+        if(object.height === undefined){
+            delete object.height;
         }
 
-        if(!samples){
-            delete request.body.data.samples;
+        if(object.samples === undefined){
+            delete object.samples;
         }
 
-        if(!negative_prompt){
-            delete request.body.data.negative_prompt;
+        if(object.negative_prompt === undefined){
+            delete object.negative_prompt;
         }
     
-        if(prompt_strength){
-            request.body.data.prompt_strength = parseFloat(request.body.data.prompt_strength)
+        if(prompt_strength !== undefined){
+            object.prompt_strength = parseFloat(object.prompt_strength)
         }else{
-            delete request.body.data.prompt_strength;
+            delete object.prompt_strength;
         }
     
-        if(!num_inference_steps){
-            delete request.body.data.num_inference_steps;
+        if(num_inference_steps === undefined){
+            delete object.num_inference_steps;
         }
     
-        if(guidance_scale){
-            request.body.data.guidance_scale = parseFloat(request.body.data.guidance_scale);
+        if(guidance_scale !== undefined){
+            object.guidance_scale = parseFloat(object.guidance_scale);
         }else{
-            delete request.body.data.guidance_scale;
+            delete object.guidance_scale;
         }
     
-        if(seed){
-            request.body.data.seed = parseInt(request.body.data.seed);
+        if(seed !== undefined){
+            object.seed = parseInt(object.seed);
         }else{
-            delete request.body.data.seed;
+            delete object.seed;
         }
         
-        if(!init_image){
-            delete request.body.data.init_image;
+        if(init_image === undefined){
+            delete object.init_image;
         }else {
     
             const img_res = await uploadImage(init_image);
             const url = img_res.secure_url.replace('.svg', '.png');
-            request.body.data.init_image = url;
+            object.init_image = url;
         }
 
-        request.body.data.webhook = `${process.env.WEBHOOK}/images/webhook`// changes when in production
         
-        return true;
+        return object;
 
     }catch (err){
         console.log(err)

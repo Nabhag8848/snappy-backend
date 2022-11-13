@@ -23,22 +23,21 @@ router.post('/create/:id',[verify_jwt, verify_user, is_validity_left], async (re
         
             const formatted_body = await format(req);
         
-            if(formatted_body != true){
+            if(formatted_body.key === undefined){
                 return res.status(400).send(`{
                     err: 'Server couldn't recognise the body you share'
                 }`);
             }
         
-            const inputs = req.body.data;
+            const inputs = formatted_body;
             const modifiers = req.body.data.modifiers;
             
             if(modifiers != undefined){
                 modifiers.forEach(modifier => {
                     inputs.prompt = `${inputs.prompt},${modifier.value}`
                 });
-            
-                delete req.body.data.modifiers;
             }
+
             console.log('input: ', inputs);
             
             const response = await fetch(`${process.env.STABLEDIFFUSIONAPI}/text2img`, {
@@ -47,14 +46,13 @@ router.post('/create/:id',[verify_jwt, verify_user, is_validity_left], async (re
                     'Content-Type': 'application/json', 
                     'Cookie': `XSRF-TOKEN=${process.env.XSRF_TOKEN}; sdapi_session=${process.env.SDAPI_SESSION}`
                 },
-                body: JSON.stringify(inputs),  
+                body: JSON.stringify(formatted_body),  
             })
-            
-            
+             
             const data = JSON.parse(await response.text());
             console.log(data);
 
-            if(data.status == 'error'){ // changes needed
+            if(data.status == 'error'){ 
 
                 return res.status(401).send({
                     "err" : data.message
