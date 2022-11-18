@@ -13,9 +13,9 @@ I am [Irfan](https://twitter.com/irffanasiff). I along with my friend [Jay](http
 
 **Next:**
 
-- [ ]  Auth implementation ( almost done )
+- [x]  Auth implementation
 - [ ]  Payment Integration
-- [ ]  Working on reducing image load time in general.
+- [x]  Working on reducing image load time in general.
 - [ ]  Less loading time for generating next image using smart queue with keyboard shortcut
 
 We are also working on a **smart queue** feature where in the load time for generating next image is drastically reduced if the user is not satisfied with the current generation and wants another one.
