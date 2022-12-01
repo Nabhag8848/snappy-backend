@@ -102,7 +102,7 @@ async function uploadImage(imageBase64) {
     return uploadResponse;
 }
 
-export async function requiredImageobj(inputs, predictionUrl){
+export async function requiredImageobj(inputs){
 
     try {
         const width = inputs.width;
@@ -116,7 +116,6 @@ export async function requiredImageobj(inputs, predictionUrl){
         const prompt_strength =  inputs.prompt_strength;
     
         const object = { 
-            image_url: predictionUrl,
             type: "TEXT_TO_IMAGE",
             prompt,
             negative_prompt,

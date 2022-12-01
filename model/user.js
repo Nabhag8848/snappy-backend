@@ -68,10 +68,10 @@ const imagesSchema = new Schema({
             default: 0
         },
         user_platform_images:  [{
-            image_url: [{ 
+            image_url: { 
                 type: String, 
                 require: true 
-            }],
+            },
             createdAt: {
                 type: Date,
                 default: new Date(0)

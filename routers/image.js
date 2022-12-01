@@ -61,18 +61,23 @@ router.post('/create/:id',[verify_jwt, verify_user, is_validity_left], async (re
             }
         
             const predictionUrl = data.output;
-            const imgObject = await requiredImageobj(inputs, predictionUrl);
+            const imgObject = await requiredImageobj(inputs);
             
             const updateCount = await User.findById(id);
-            updateCount.num_images_generated += inputs.samples;
+            updateCount.num_images_generated += parseInt(inputs.samples);
             await updateCount.save();
 
             const result = await Images.findOne({"generatedBy": id});
 
             const len = result.user_platform[0].user_platform_images.length;
-            result.user_platform[0].user_platform_images.push(imgObject);
-            result.user_platform[0].number_of_images_generated = len + inputs.samples;
-            result.num_images_generated += inputs.samples;
+            result.user_platform[0].number_of_images_generated = len + parseInt(inputs.samples);
+
+            for(let count = 0; count < predictionUrl.length; ++count){
+                imgObject.image_url = predictionUrl[count];
+                result.user_platform[0].user_platform_images.push(imgObject);
+            }
+
+            result.num_images_generated += parseInt(inputs.samples);
             await result.save();
 
             res.status(200).send(predictionUrl);
