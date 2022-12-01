@@ -39,8 +39,16 @@ router.post('/create/:id',[verify_jwt, verify_user, is_validity_left], async (re
             }
 
             console.log('input: ', inputs);
+
+            let URL = `${process.env.STABLEDIFFUSIONAPI}/`;
+
+            if(formatted_body.init_image === undefined){
+                URL += 'text2img';
+            }else{
+                URL += 'img2img';
+            }
             
-            const response = await fetch(`${process.env.STABLEDIFFUSIONAPI}/text2img`, {
+            const response = await fetch(URL, {
                 method:"POST",
                 headers: { 
                     'Content-Type': 'application/json', 
