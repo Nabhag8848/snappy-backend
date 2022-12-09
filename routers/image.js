@@ -163,6 +163,34 @@ router.get('/search/:term',[verify_jwt, verify_user], async (req, res) => {
         
 })
 
+router.post('/4k', async (req ,res) => {
+
+    try{
+
+        const url = req.body.url;
+        const scale = req.body.scale;
+        const face_enchance = req.body.face_enchance || false;
+
+        const response = await fetch(`${process.env.STABLEDIFFUSIONAPI}/super_resolution`, {
+            method:"POST", 
+            body: JSON.stringify({
+                key: process.env.STABLEDIFFUSIONKEY,
+                url,
+                scale,
+                face_enchance
+            })
+        })
+
+        const data = await response.json();
+        res.status(200).send(data);
+
+    }catch(err){
+
+        console.error(err);
+        res.status(400).send(err);
+    }
+})
+
 export {router as images};
 
 // endpoints: /images/search/:id, /images/:id, /images/create/:id
