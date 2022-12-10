@@ -170,11 +170,16 @@ router.post('/4k', async (req ,res) => {
         const url = req.body.url;
         const scale = req.body.scale;
         const face_enchance = req.body.face_enchance || false;
+        const key = `${process.env.STABLEDIFFUSIONKEY}`;
 
         const response = await fetch(`${process.env.STABLEDIFFUSIONAPI}/super_resolution`, {
-            method:"POST", 
+            method:"POST",
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Cookie': `XSRF-TOKEN=${process.env.XSRF_TOKEN}; sdapi_session=${process.env.SDAPI_SESSION}`
+            }, 
             body: JSON.stringify({
-                key: process.env.STABLEDIFFUSIONKEY,
+                key,
                 url,
                 scale,
                 face_enchance
