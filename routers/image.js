@@ -190,7 +190,7 @@ router.post('/4k', async (req ,res) => {
 
         const data = await response.json();
         const output_image = data.output;
-        res.status(200).send(output_image);
+        res.status(200).send([output_image]);
 
     }catch(err){
 
