@@ -97,7 +97,7 @@ export async function format(request){
 }
 
 
-async function uploadImage(imageBase64) {
+export async function uploadImage(imageBase64) {
     const uploadResponse = await cloudinary.v2.uploader.upload(imageBase64, {})
     return uploadResponse;
 }

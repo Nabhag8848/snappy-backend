@@ -4,6 +4,7 @@ import {User, Images} from '../model/user.js';
 import {mongoose} from '../db/mongoconnection.js';
 import { is_validity_left, verify_user, verify_jwt } from '../auth/auth.js';
 import fetch from 'node-fetch';
+import {uploadImage} from '../services/format.js';
 
 
 const router = express.Router();
@@ -167,7 +168,8 @@ router.post('/4k', async (req ,res) => {
 
     try{
 
-        const url = req.body.url;
+        const img_res = await uploadImage(req.body.url);
+        const url = img_res.secure_url.replace('.svg', '.png');
         const scale = req.body.scale;
         const face_enchance = req.body.face_enchance || false;
         const key = `${process.env.STABLEDIFFUSIONKEY}`;
