@@ -2,6 +2,7 @@ import mongoose,{ Schema } from "mongoose";
 import {connect} from '../db/mongoconnection.js';
 import validator from 'validator';
 import {getUserIdFromToken} from '../services/authorization.js';
+import fetch from 'node-fetch';
 
 connect();
 

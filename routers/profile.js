@@ -33,7 +33,7 @@ router.post('/token', async ( req, res ) => {
                 user
             });
 
-            return res.status(200).send("published");  
+            return res.status(200).send(user);  
         }
 
       return res.status(500).send("problem storing");
