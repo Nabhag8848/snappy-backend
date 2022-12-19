@@ -7,6 +7,7 @@ import { JwksRateLimitError } from 'jwks-rsa';
 import { getUserIdFromToken, VerifySecretFromToken,getUserIdFromSub } from './services/authorization.js';
 import { images} from './routers/image.js';
 import { profile } from './routers/profile.js';
+import { payment } from './payment/payment.js';
 
 const app = express();
 const appolling = longpoll(app);
@@ -44,6 +45,7 @@ app.get('/', async (req, res) => {
 
 app.use('/images', images);
 app.use('/profile', profile);
+app.use('/payment', payment);
 
 app.use((req, res, next) => {
     res.status(404).send('404 Not found');   

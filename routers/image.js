@@ -164,7 +164,8 @@ router.get('/search/:term',[verify_jwt, verify_user], async (req, res) => {
         
 })
 
-router.post('/4k', async (req ,res) => {
+// auth to this url is left
+router.post('/4k',[verify_jwt, verify_user], async (req ,res) => {
 
     try{
 
@@ -188,7 +189,7 @@ router.post('/4k', async (req ,res) => {
             })
         })
 
-        const data = await response.json();
+        const data = JSON.parse(await response.json());
         const output_image = data.output;
         res.status(200).send([output_image]);
 

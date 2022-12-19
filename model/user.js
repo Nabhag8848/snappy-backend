@@ -124,6 +124,20 @@ userSchema.statics.isUserExist = async function({
         console.log('finding user', user);
 
         if(!user){
+
+            const customer = await fetch('/create-customer', {
+                method: 'post',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  email,
+                  name,
+                }),
+            });
+
+            const customerObject = await customer.json();
+        
             const user_id = getUserIdFromToken(access_token);
             const newUser = User.create({
                 user_id,
@@ -132,6 +146,9 @@ userSchema.statics.isUserExist = async function({
                 name,
                 picture,
             })
+
+            // need to store in db
+            newUser.cus_id = customerObject.cus_id;
 
             const imgInstance = new Images({
                 generatedBy: (await newUser).id,
@@ -147,6 +164,8 @@ userSchema.statics.isUserExist = async function({
             
             return newUser;
         }
+
+        // retrive a customer and share it
 
         return user;
 
