@@ -126,7 +126,7 @@ userSchema.statics.isUserExist = async function({
 
         if(!user){
 
-            const customer = await fetch('/create-customer', {
+            const customer = await fetch('/payment/create-customer', {
                 method: 'post',
                 headers: {
                   'Content-Type': 'application/json',
