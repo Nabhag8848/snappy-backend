@@ -153,7 +153,7 @@ userSchema.statics.isUserExist = async function({
 
             const user_id = getUserIdFromToken(access_token);
             const newUser = User.create({
-                cus_id
+                cus_id,
                 user_id,
                 username:nickname,
                 email,
