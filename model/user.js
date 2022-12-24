@@ -3,6 +3,8 @@ import {connect} from '../db/mongoconnection.js';
 import validator from 'validator';
 import {getUserIdFromToken} from '../services/authorization.js';
 import fetch from 'node-fetch';
+import * as dotenv from "dotenv";
+dotenv.config();
 
 connect();
 
@@ -126,16 +128,18 @@ userSchema.statics.isUserExist = async function({
 
         if(!user){
 
-            const customer = await fetch( 'https://snappy.up.railway.app/payment/create-customer', {
-                method: 'post',
+            const customer = await fetch(`${process.env.WEBHOOK}/payment/create-customer`,
+              {
+                method: "post",
                 headers: {
-                  'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                   email,
                   name,
                 }),
-            });
+              }
+            );
 
             const customerObject = await customer.json();
         
