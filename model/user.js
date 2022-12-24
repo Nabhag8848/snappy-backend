@@ -134,8 +134,7 @@ userSchema.statics.isUserExist = async function({
 
         if(!user){
             const customerObject = await createCustomer(email, name);
-            
-            const cus_id = customerObject.cus_id;
+            const cus_id = customerObject.id;
 
             const user_id = getUserIdFromToken(access_token);
             const newUser = User.create({

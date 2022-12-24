@@ -45,6 +45,33 @@ router.post('/token', async ( req, res ) => {
    
 })  
 
+router.post("/login", async (req, res) => {
+  try {
+    console.log("body: ", req.body);
+
+    const user = await User.isUserExist(req.body.user, req.body.access_token);
+
+    const code = req.body.code;
+    const token = req.body.access_token;
+
+    if (!VerifySecretFromToken(token)) {
+      return res.status(401).send({
+        status: 401,
+        description: "couldn't verify the payload secret",
+      });
+    }
+
+    if (user) {
+      return res.status(200).send(user);
+    }
+
+    return res.status(500).send({"error": "problem creating user"});
+  } catch (err) {
+    console.log(err);
+    res.status(400).send(err);
+  }
+});  
+
 router.get('/:id', [verify_jwt,verify_user], async (req ,res) => {
     
     try{
