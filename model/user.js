@@ -9,6 +9,12 @@ dotenv.config();
 connect();
 
 const userSchema = new Schema({
+    cus_id: {
+        type: String,
+        unique:true,
+        required: true,
+        trim: true
+    },
     user_id: {
         type:String,
         unique:true,
@@ -128,7 +134,7 @@ userSchema.statics.isUserExist = async function({
 
         if(!user){
 
-            const customer = await fetch(`${process.env.WEBHOOK}/payment/create-customer`,
+            const customer = await fetch(`${process.env.WEBHOOK}payment/create-customer`,
               {
                 method: "post",
                 headers: {
@@ -142,9 +148,12 @@ userSchema.statics.isUserExist = async function({
             );
 
             const customerObject = await customer.json();
-        
+            
+            const {cus_id} = customerObject;
+
             const user_id = getUserIdFromToken(access_token);
             const newUser = User.create({
+                cus_id
                 user_id,
                 username:nickname,
                 email,
@@ -152,8 +161,6 @@ userSchema.statics.isUserExist = async function({
                 picture,
             })
 
-            // need to store in db
-            newUser.cus_id = customerObject.cus_id;
 
             const imgInstance = new Images({
                 generatedBy: (await newUser).id,
