@@ -133,7 +133,7 @@ userSchema.statics.isUserExist = async function({
         console.log('finding user', user);
 
         if(!user){
-
+            console.log(process.env.WEBHOOK);
             const customer = await fetch(`${process.env.WEBHOOK}payment/create-customer`,
               {
                 method: "post",
@@ -149,7 +149,7 @@ userSchema.statics.isUserExist = async function({
 
             const customerObject = await customer.json();
             
-            const {cus_id} = customerObject;
+            const cus_id = customerObject.cus_id;
 
             const user_id = getUserIdFromToken(access_token);
             const newUser = User.create({
