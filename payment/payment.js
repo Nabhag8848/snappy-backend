@@ -19,6 +19,7 @@ router.post('/create-customer', async (req, res) => {
 
         // if(email || name))
         const CustomerObject = await createCustomer(email, name);
+        console.log(CustomerObject);
         res.status(201).send(CustomerObject);
     }catch(err){
         res.status(400).send(err)

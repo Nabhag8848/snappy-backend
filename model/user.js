@@ -5,6 +5,7 @@ import {getUserIdFromToken} from '../services/authorization.js';
 import fetch from 'node-fetch';
 import * as dotenv from "dotenv";
 dotenv.config();
+import { createCustomer } from "../services/customer.js";
 
 connect();
 
@@ -12,7 +13,6 @@ const userSchema = new Schema({
     cus_id: {
         type: String,
         unique:true,
-        required: true,
         trim: true
     },
     user_id: {
@@ -133,21 +133,7 @@ userSchema.statics.isUserExist = async function({
         console.log('finding user', user);
 
         if(!user){
-            console.log(process.env.WEBHOOK);
-            const customer = await fetch(`${process.env.WEBHOOK}payment/create-customer`,
-              {
-                method: "post",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  email,
-                  name,
-                }),
-              }
-            );
-
-            const customerObject = await customer.json();
+            const customerObject = await createCustomer(email, name);
             
             const cus_id = customerObject.cus_id;
 
